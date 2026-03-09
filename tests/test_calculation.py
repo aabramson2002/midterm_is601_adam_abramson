@@ -75,7 +75,7 @@ def test_percentage_by_zero():
         Calculation(operation="Percentage", operand1=Decimal("10"), operand2=Decimal("0"))
 
 def test_absolute_difference():
-    calc = Calculation(operation="AbsoluteDifference", operand1=Decimal("-5"), operand2=Decimal("-2"))
+    calc = Calculation(operation="AbsoluteDifference", operand1=Decimal("-5"), operand2=Decimal("2"))
     assert calc.result == Decimal("7")
 
 def test_unknown_operation():

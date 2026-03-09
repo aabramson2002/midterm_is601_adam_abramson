@@ -66,9 +66,9 @@ class Calculation:
                 if x >= 0 and y != 0 
                 else self._raise_invalid_root(x, y)
             ),
-            "Modulus": lambda x, y: x % y if y != 0 else self._raise_div_zero(),
-            "IntDivision": lambda x, y: Decimal(x // y) if y != 0 else self._raise_div_zero(),
-            "Percentage": lambda x, y: Decimal((x / y) * 100) if y != 0 else self._raise_div_zero(),
+            "Modulus": lambda x, y: x % y if y != 0 else self._raise_mod_zero(),
+            "IntDivision": lambda x, y: Decimal(x // y) if y != 0 else self._raise_int_div_zero(),
+            "Percentage": lambda x, y: Decimal((x / y) * 100) if y != 0 else self._raise_percent_zero(),
             "AbsoluteDifference": lambda x, y: abs(x - y)
 
         }
@@ -120,6 +120,33 @@ class Calculation:
         if x < 0:
             raise OperationError("Cannot calculate root of negative number")
         raise OperationError("Invalid root operation")
+
+    @staticmethod
+    def _raise_mod_zero():  # pragma: no cover
+        """
+        Helper method to raise division by zero error.
+
+        This method is called when a division by zero is attempted.
+        """
+        raise OperationError("Modulus by zero is not allowed")
+    
+    @staticmethod
+    def _raise_int_div_zero():  # pragma: no cover
+        """
+        Helper method to raise division by zero error.
+
+        This method is called when a division by zero is attempted.
+        """
+        raise OperationError("Integer division by zero is not allowed")
+    
+    @staticmethod
+    def _raise_percent_zero():  # pragma: no cover
+        """
+        Helper method to raise division by zero error.
+
+        This method is called when a division by zero is attempted.
+        """
+        raise OperationError("Percentage by zero is not allowed")
 
     def to_dict(self) -> Dict[str, Any]:
         """
