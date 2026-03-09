@@ -411,7 +411,7 @@ class Calculator:
             calc.add_observer(LoggingObserver())
             calc.add_observer(AutoSaveObserver(calc))
 
-            print("Calculator started. Type 'help' for commands.")
+            print("Calculator started. Welcome! Type 'help' for commands.")
 
             while True:
                 try:
@@ -421,7 +421,7 @@ class Calculator:
                     if command == 'help':
                         # Display available commands
                         print("\nAvailable commands:")
-                        print("  add, subtract, multiply, divide, power, root - Perform calculations")
+                        print("  add, subtract, multiply, divide, power, root, mod, intdivide, percent, abs - Perform calculations")
                         print("  history - Show calculation history")
                         print("  clear - Clear calculation history")
                         print("  undo - Undo the last calculation")
@@ -492,7 +492,7 @@ class Calculator:
                             print(f"Error loading history: {e}")
                         continue
 
-                    if command in ['add', 'subtract', 'multiply', 'divide', 'power', 'root']:
+                    if command in ['add', 'subtract', 'multiply', 'divide', 'power', 'root', 'mod', 'intdivide', 'percent', 'abs']:
                         # Perform the specified arithmetic operation
                         try:
                             print("\nEnter numbers (or 'cancel' to abort):")
