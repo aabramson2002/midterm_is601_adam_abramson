@@ -1,96 +1,73 @@
-########################
-# History Management    #
-########################
-
-from abc import ABC, abstractmethod
-import logging
-from typing import Any
+import pytest
+from unittest.mock import Mock, patch
 from app.calculation import Calculation
+from app.history import LoggingObserver, AutoSaveObserver
+from app.calculator import Calculator
+from app.calculator_config import CalculatorConfig
 
+# Sample setup for mock calculation
+calculation_mock = Mock(spec=Calculation)
+calculation_mock.operation = "addition"
+calculation_mock.operand1 = 5
+calculation_mock.operand2 = 3
+calculation_mock.result = 8
 
-class HistoryObserver(ABC):
-    """
-    Abstract base class for calculator observers.
+# Test cases for LoggingObserver
 
-    This class defines the interface for observers that monitor and react to
-    new calculation events. Implementing classes must provide an update method
-    to handle the received Calculation instance.
-    """
+@patch('logging.info')
+def test_logging_observer_logs_calculation(logging_info_mock):
+    observer = LoggingObserver()
+    observer.update(calculation_mock)
+    logging_info_mock.assert_called_once_with(
+        "Calculation performed: addition (5, 3) = 8"
+    )
 
-    @abstractmethod
-    def update(self, calculation: Calculation) -> None:
-        """
-        Handle new calculation event.
+def test_logging_observer_no_calculation():
+    observer = LoggingObserver()
+    with pytest.raises(AttributeError):
+        observer.update(None)  # Passing None should raise an exception as there's no calculation
 
-        Args:
-            calculation (Calculation): The calculation that was performed.
-        """
-        pass  # pragma: no cover
+# Test cases for AutoSaveObserver
 
+def test_autosave_observer_triggers_save():
+    calculator_mock = Mock(spec=Calculator)
+    calculator_mock.config = Mock(spec=CalculatorConfig)
+    calculator_mock.config.auto_save = True
+    observer = AutoSaveObserver(calculator_mock)
+    
+    observer.update(calculation_mock)
+    calculator_mock.save_history.assert_called_once()
 
-class LoggingObserver(HistoryObserver):
-    """
-    Observer that logs calculations to a file.
+@patch('logging.info')
+def test_autosave_observer_logs_autosave(logging_info_mock):
+    calculator_mock = Mock(spec=Calculator)
+    calculator_mock.config = Mock(spec=CalculatorConfig)
+    calculator_mock.config.auto_save = True
+    observer = AutoSaveObserver(calculator_mock)
+    
+    observer.update(calculation_mock)
+    logging_info_mock.assert_called_once_with("History auto-saved")
 
-    Implements the Observer pattern by listening for new calculations and logging
-    their details to a log file.
-    """
+def test_autosave_observer_does_not_trigger_save_when_disabled():
+    calculator_mock = Mock(spec=Calculator)
+    calculator_mock.config = Mock(spec=CalculatorConfig)
+    calculator_mock.config.auto_save = False
+    observer = AutoSaveObserver(calculator_mock)
+    
+    observer.update(calculation_mock)
+    calculator_mock.save_history.assert_not_called()
 
-    def update(self, calculation: Calculation) -> None:
-        """
-        Log calculation details.
+# Additional negative test cases for AutoSaveObserver
 
-        This method is called whenever a new calculation is performed. It records
-        the operation, operands, and result in the log file.
+def test_autosave_observer_invalid_calculator():
+    with pytest.raises(TypeError):
+        AutoSaveObserver(None)  # Passing None should raise a TypeError
 
-        Args:
-            calculation (Calculation): The calculation that was performed.
-        """
-        if calculation is None:
-            raise AttributeError("Calculation cannot be None")
-        logging.info(
-            f"Calculation performed: {calculation.operation} "
-            f"({calculation.operand1}, {calculation.operand2}) = "
-            f"{calculation.result}"
-        )
-
-
-class AutoSaveObserver(HistoryObserver):
-    """
-    Observer that automatically saves calculations.
-
-    Implements the Observer pattern by listening for new calculations and
-    triggering an automatic save of the calculation history if the auto-save
-    feature is enabled in the configuration.
-    """
-
-    def __init__(self, calculator: Any):
-        """
-        Initialize the AutoSaveObserver.
-
-        Args:
-            calculator (Any): The calculator instance to interact with.
-                Must have 'config' and 'save_history' attributes.
-
-        Raises:
-            TypeError: If the calculator does not have the required attributes.
-        """
-        if not hasattr(calculator, 'config') or not hasattr(calculator, 'save_history'):
-            raise TypeError("Calculator must have 'config' and 'save_history' attributes")
-        self.calculator = calculator
-
-    def update(self, calculation: Calculation) -> None:
-        """
-        Trigger auto-save.
-
-        This method is called whenever a new calculation is performed. If the
-        auto-save feature is enabled, it saves the current calculation history.
-
-        Args:
-            calculation (Calculation): The calculation that was performed.
-        """
-        if calculation is None:
-            raise AttributeError("Calculation cannot be None")
-        if self.calculator.config.auto_save:
-            self.calculator.save_history()
-            logging.info("History auto-saved")
+def test_autosave_observer_no_calculation():
+    calculator_mock = Mock(spec=Calculator)
+    calculator_mock.config = Mock(spec=CalculatorConfig)
+    calculator_mock.config.auto_save = True
+    observer = AutoSaveObserver(calculator_mock)
+    
+    with pytest.raises(AttributeError):
+        observer.update(None)  # Passing None should raise an exception
