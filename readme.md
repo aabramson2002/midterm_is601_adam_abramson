@@ -1,4 +1,2 @@
 # Description
-This project is a calculator. 
-
-# Files copied from Module 5
+This project is a calculator that can perform advanced operations
