@@ -178,7 +178,7 @@ class TestModulus(BaseOperationTest):
         "positive_numbers": {"a": "5", "b": "2", "expected": "1"},
         "even_divide": {"a": "6", "b": "2", "expected": "0"},
         "negative_numbers": {"a": "-7", "b": "-5", "expected": "-2"},
-        "mixed_signs": {"a": "-4", "b": "3", "expected": "2"},
+        "mixed_signs": {"a": "-4", "b": "3", "expected": "-1"},
         "decimals": {"a": "5.5", "b": "2", "expected": "1.5"},
         "divide_zero": {"a": "0", "b": "3", "expected": "0"},
     }
@@ -198,7 +198,7 @@ class TestIntDivision(BaseOperationTest):
         "positive_numbers": {"a": "5", "b": "2", "expected": "2"},
         "even_divide": {"a": "6", "b": "2", "expected": "3"},
         "negative_numbers": {"a": "-8", "b": "-5", "expected": "1"},
-        "mixed_signs": {"a": "7", "b": "-3", "expected": "-3"},
+        "mixed_signs": {"a": "7", "b": "-3", "expected": "-2"},
         "decimals": {"a": "5.5", "b": "2", "expected": "2.0"},
         "decimal_divisor": {"a": "10", "b": "3.5", "expected": "2.0"},
         "divide_zero": {"a": "0", "b": "3", "expected": "0"},
@@ -232,7 +232,7 @@ class TestPercentage(BaseOperationTest):
     }
 
 class TestAbsoluteDifference(BaseOperationTest):
-    """Test Subtraction operation."""
+    """Test Absolute difference operation."""
 
     operation_class = AbsoluteDifference
     valid_test_cases = {

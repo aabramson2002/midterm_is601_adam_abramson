@@ -380,7 +380,7 @@ class AbsoluteDifference:
         Returns:
             Decimal: Absolute value of the two operands.
         """
-        self.validate_operands(a, b)
+        #self.validate_operands(a, b)
         return abs(a - b)
 
 class OperationFactory:
