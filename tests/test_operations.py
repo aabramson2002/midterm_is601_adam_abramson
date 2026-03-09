@@ -208,7 +208,7 @@ class TestIntDivision(BaseOperationTest):
             "a": "20",
             "b": "0",
             "error": ValidationError,
-            "message": "Division by zero is not allowed"
+            "message": "Integer Division by zero is not allowed"
         },
     }
 
@@ -227,7 +227,7 @@ class TestPercentage(BaseOperationTest):
             "a": "4",
             "b": "0",
             "error": ValidationError,
-            "message": "Modulus by zero is not allowed"
+            "message": "Percentage by zero is not allowed"
         },
     }
 
