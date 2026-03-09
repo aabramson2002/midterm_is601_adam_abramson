@@ -363,7 +363,7 @@ class Percentage(Operation):
         self.validate_operands(a, b)
         return Decimal((a / b) * 100)
 
-class AbsoluteDifference:
+class AbsoluteDifference(Operation):
     """
     Absolute difference operation implementation.
 
@@ -380,7 +380,7 @@ class AbsoluteDifference:
         Returns:
             Decimal: Absolute value of the two operands.
         """
-        #self.validate_operands(a, b)
+        self.validate_operands(a, b)
         return abs(a - b)
 
 class OperationFactory:
