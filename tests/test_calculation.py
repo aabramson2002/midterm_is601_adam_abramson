@@ -50,6 +50,10 @@ def test_invalid_root():
     with pytest.raises(OperationError, match="Cannot calculate root of negative number"):
         Calculation(operation="Root", operand1=Decimal("-16"), operand2=Decimal("2"))
 
+def test_zero_root():
+    with pytest.raises(OperationError, match="Zero root is undefined"):
+        Calculation(operation="Root", operand1=Decimal("16"), operand2=Decimal("0"))
+
 def test_modulus():
     calc = Calculation(operation="Modulus", operand1=Decimal("7"), operand2=Decimal("3"))
     assert calc.result == Decimal("1")
