@@ -1,15 +1,19 @@
 import datetime
 from pathlib import Path
 import pandas as pd
+import colorama
 import pytest
 from unittest.mock import Mock, patch, PropertyMock
 from decimal import Decimal
 from tempfile import TemporaryDirectory
 from app.calculator import Calculator
 from app.calculator_config import CalculatorConfig
+from app.calculator_memento import CalculatorMemento
+from app.calculation import Calculation
 from app.exceptions import OperationError, ValidationError
 from app.history import LoggingObserver, AutoSaveObserver
 from app.operations import OperationFactory
+from colorama import Fore, Back, Style
 
 # Fixture to initialize Calculator with a temporary directory for file paths
 @pytest.fixture
@@ -35,7 +39,7 @@ def calculator():
 
 # Test Calculator Initialization
 
-def test_calculator_initialization(calculator):
+def test_calculator_initialization(calculator: Calculator):
     assert calculator.history == []
     assert calculator.undo_stack == []
     assert calculator.redo_stack == []
@@ -56,12 +60,12 @@ def test_logging_setup(logging_info_mock):
 
 # Test Adding and Removing Observers
 
-def test_add_observer(calculator):
+def test_add_observer(calculator: Calculator):
     observer = LoggingObserver()
     calculator.add_observer(observer)
     assert observer in calculator.observers
 
-def test_remove_observer(calculator):
+def test_remove_observer(calculator: Calculator):
     observer = LoggingObserver()
     calculator.add_observer(observer)
     calculator.remove_observer(observer)
@@ -69,38 +73,38 @@ def test_remove_observer(calculator):
 
 # Test Setting Operations
 
-def test_set_operation(calculator):
+def test_set_operation(calculator: Calculator):
     operation = OperationFactory.create_operation('add')
     calculator.set_operation(operation)
     assert calculator.operation_strategy == operation
 
 # Test Performing Operations
 
-def test_perform_operation_addition(calculator):
+def test_perform_operation_addition(calculator: Calculator):
     operation = OperationFactory.create_operation('add')
     calculator.set_operation(operation)
     result = calculator.perform_operation(2, 3)
     assert result == Decimal('5')
 
-def test_perform_operation_validation_error(calculator):
+def test_perform_operation_validation_error(calculator: Calculator):
     calculator.set_operation(OperationFactory.create_operation('add'))
     with pytest.raises(ValidationError):
         calculator.perform_operation('invalid', 3)
 
-def test_perform_operation_operation_error(calculator):
+def test_perform_operation_operation_error(calculator: Calculator):
     with pytest.raises(OperationError, match="No operation set"):
         calculator.perform_operation(2, 3)
 
 # Test Undo/Redo Functionality
 
-def test_undo(calculator):
+def test_undo(calculator: Calculator):
     operation = OperationFactory.create_operation('add')
     calculator.set_operation(operation)
     calculator.perform_operation(2, 3)
     calculator.undo()
     assert calculator.history == []
 
-def test_redo(calculator):
+def test_redo(calculator: Calculator):
     operation = OperationFactory.create_operation('add')
     calculator.set_operation(operation)
     calculator.perform_operation(2, 3)
@@ -111,7 +115,7 @@ def test_redo(calculator):
 # Test History Management
 
 @patch('app.calculator.pd.DataFrame.to_csv')
-def test_save_history(mock_to_csv, calculator):
+def test_save_history(mock_to_csv, calculator: Calculator):
     operation = OperationFactory.create_operation('add')
     calculator.set_operation(operation)
     calculator.perform_operation(2, 3)
@@ -120,7 +124,7 @@ def test_save_history(mock_to_csv, calculator):
 
 @patch('app.calculator.pd.read_csv')
 @patch('app.calculator.Path.exists', return_value=True)
-def test_load_history(mock_exists, mock_read_csv, calculator):
+def test_load_history(mock_exists, mock_read_csv, calculator: Calculator):
     # Mock CSV data to match the expected format in from_dict
     mock_read_csv.return_value = pd.DataFrame({
         'operation': ['Addition'],
@@ -146,7 +150,7 @@ def test_load_history(mock_exists, mock_read_csv, calculator):
             
 # Test Clearing History
 
-def test_clear_history(calculator):
+def test_clear_history(calculator: Calculator):
     operation = OperationFactory.create_operation('add')
     calculator.set_operation(operation)
     calculator.perform_operation(2, 3)
@@ -163,20 +167,20 @@ def test_calculator_repl_exit(mock_print, mock_input):
     with patch('app.calculator.Calculator.save_history') as mock_save_history:
         Calculator.calculator_repl()
         mock_save_history.assert_called_once()
-        mock_print.assert_any_call("History saved successfully.")
+        mock_print.assert_any_call(f"{Fore.GREEN}History saved successfully.{Style.RESET_ALL}")
         mock_print.assert_any_call("Goodbye!")
 
 @patch('builtins.input', side_effect=['help', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_help(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("\nAvailable commands:")
+    mock_print.assert_any_call(f"\n{Style.BRIGHT}Available commands:{Style.RESET_ALL}")
 
 @patch('builtins.input', side_effect=['add', '2', '3', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_addition(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("\nResult: 5")
+    mock_print.assert_any_call(f"\n{Style.BRIGHT}{Fore.CYAN}Result:{Style.RESET_ALL} 5")
 
 """
 #Tests history on repl with empty history
@@ -184,8 +188,7 @@ def test_calculator_repl_addition(mock_print, mock_input):
 @patch('builtins.print')
 def test_calculator_repl_history_empty(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("No calculations in history")\
-
+    mock_print.assert_any_call("No calculations in history")
 #Tests history on repl with non-empty history
 @patch('builtins.input', side_effect=['add', '1', '2', 'history', 'exit'])
 @patch('builtins.print')
@@ -200,42 +203,42 @@ def test_calculator_repl_history_non_empty(mock_print, mock_input):
 @patch('builtins.print')
 def test_calculator_repl_clear(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("History cleared")
+    mock_print.assert_any_call(f"{Fore.GREEN}History cleared{Style.RESET_ALL}")
 
 #Tests undo commmand on repl
 @patch('builtins.input', side_effect=['add', '1', '2', 'undo', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_undo_success(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Operation undone")
+    mock_print.assert_any_call(f"{Fore.GREEN}Operation undone{Style.RESET_ALL}")
 
 #Tests fail case for undo command on repl
 @patch('builtins.input', side_effect=['undo', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_undo_fail(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Nothing to undo")
+    mock_print.assert_any_call(f"{Fore.RED}Nothing to undo{Style.RESET_ALL}")
 
 #Tests redo commmand on repl
 @patch('builtins.input', side_effect=['add', '1', '2', 'undo', 'redo', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_redo_success(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Operation redone")
+    mock_print.assert_any_call(f"{Fore.GREEN}Operation redone{Style.RESET_ALL}")
 
 #Tests fail case for redo command on repl
 @patch('builtins.input', side_effect=['redo', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_redo_fail(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Nothing to redo")
+    mock_print.assert_any_call(f"{Fore.RED}Nothing to redo{Style.RESET_ALL}")
 
 #Tests save command on repl
 @patch('builtins.input', side_effect=['save', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_save_success(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("History saved successfully")
+    mock_print.assert_any_call(f"{Fore.GREEN}History saved successfully{Style.RESET_ALL}")
 
 #Tests fail case for save command on repl
 @patch('builtins.input', side_effect=['save', 'exit'])
@@ -243,14 +246,14 @@ def test_calculator_repl_save_success(mock_print, mock_input):
 @patch('app.calculator.Calculator.save_history', side_effect=Exception("Save failed"))
 def test_calculator_repl_save_fail(mock_save, mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Error saving history: Save failed")
+    mock_print.assert_any_call(f"{Fore.RED}Error saving history: Save failed{Style.RESET_ALL}")
 
 #Tests load command on repl
 @patch('builtins.input', side_effect=['load', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_load_success(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("History loaded successfully")
+    mock_print.assert_any_call(f"{Fore.GREEN}History loaded successfully{Style.RESET_ALL}")
 
 #Tests fail case for load command on repl
 @patch('builtins.input', side_effect=['load', 'exit'])
@@ -258,35 +261,35 @@ def test_calculator_repl_load_success(mock_print, mock_input):
 @patch('app.calculator.Calculator.load_history', side_effect=Exception("Load failed"))
 def test_calculator_repl_load_fail(mock_load, mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Error loading history: Load failed")
+    mock_print.assert_any_call(f"{Fore.RED}Error loading history: Load failed{Style.RESET_ALL}")
 
 #Test case for commands that do not exist on repl
 @patch('builtins.input', side_effect=['pizza', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_unknown_command(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Unknown command: 'pizza'. Type 'help' for available commands.")
+    mock_print.assert_any_call(f"{Fore.RED}Unknown command: {Fore.WHITE}'pizza'{Fore.RED}. Type {Fore.YELLOW}'help'{Fore.RED} for available commands.{Style.RESET_ALL}")
 
 #Tests cancel command on the first number when doing an operation on calculator
 @patch('builtins.input', side_effect=['add', 'cancel', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_operation_cancel_first(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Operation cancelled")
+    mock_print.assert_any_call(f"{Fore.MAGENTA}Operation cancelled{Style.RESET_ALL}")
 
 #Tests cancel command on the second number when doing an operation on calculator
 @patch('builtins.input', side_effect=['add', '1', 'cancel', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_operation_cancel_second(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Operation cancelled")
+    mock_print.assert_any_call(f"{Fore.MAGENTA}Operation cancelled{Style.RESET_ALL}")
 
 #Tests invalid number format when doing an operation on calculator
 @patch('builtins.input', side_effect=['add', '3', 'x', 'exit'])
 @patch('builtins.print')
 def test_calculator_repl_operation_validation_error(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Error: Invalid number format: x")
+    mock_print.assert_any_call(f"{Fore.RED}Error: Invalid number format: x{Style.RESET_ALL}")
 
 
 #Tests for operation errors like division by zero on calculator
@@ -294,4 +297,4 @@ def test_calculator_repl_operation_validation_error(mock_print, mock_input):
 @patch('builtins.print')
 def test_calculator_repl_operation_operation_error(mock_print, mock_input):
     Calculator.calculator_repl()
-    mock_print.assert_any_call("Error: Division by zero is not allowed")
+    mock_print.assert_any_call(f"{Fore.RED}Error: Division by zero is not allowed{Style.RESET_ALL}")
