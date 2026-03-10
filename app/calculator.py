@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import pandas as pd
+import colorama
 
 from app.calculation import Calculation
 from app.calculator_config import CalculatorConfig
@@ -17,6 +18,7 @@ from app.exceptions import OperationError, ValidationError
 from app.history import HistoryObserver, LoggingObserver, AutoSaveObserver
 from app.input_validators import InputValidator
 from app.operations import Operation, OperationFactory
+from colorama import Fore, Back, Style
 
 # Type aliases for better readability
 Number = Union[int, float, Decimal]
@@ -411,7 +413,9 @@ class Calculator:
             calc.add_observer(LoggingObserver())
             calc.add_observer(AutoSaveObserver(calc))
 
-            print("Calculator started. Welcome! Type 'help' for commands.")
+            colorama.init()
+
+            print(f"Calculator started.{Style.BRIGHT}{Fore.GREEN} Welcome! Type {Fore.CYAN}'help'{Fore.GREEN} for commands.{Style.RESET_ALL}")
 
             while True:
                 try:
@@ -421,14 +425,14 @@ class Calculator:
                     if command == 'help':
                         # Display available commands
                         print("\nAvailable commands:")
-                        print("  add, subtract, multiply, divide, power, root, modulus, int_divide, percent, abs_diff - Perform calculations")
-                        print("  history - Show calculation history")
-                        print("  clear - Clear calculation history")
-                        print("  undo - Undo the last calculation")
-                        print("  redo - Redo the last undone calculation")
-                        print("  save - Save calculation history to file")
-                        print("  load - Load calculation history from file")
-                        print("  exit - Exit the calculator")
+                        print(f"  {Fore.BLUE}add, {Fore.GREEN}subtract, {Fore.RED}multiply, {Fore.YELLOW}divide, {Fore.CYAN}power, {Fore.MAGENTA}root, {Fore.LIGHTBLUE_EX}modulus, {Fore.LIGHTYELLOW_EX}int_divide, {Fore.LIGHTRED_EX}percent, {Fore.LIGHTGREEN_EX}abs_diff {Style.RESET_ALL}- Perform calculations ")
+                        print(f"  {Back.RED}history - Show calculation history{Style.RESET_ALL}")
+                        print(f"  {Back.GREEN}clear - Clear calculation history{Style.RESET_ALL}")
+                        print(f"  {Back.BLUE}undo - Undo the last calculation{Style.RESET_ALL}")
+                        print(f"  {Back.CYAN}redo - Redo the last undone calculation{Style.RESET_ALL}")
+                        print(f"  {Back.MAGENTA}save - Save calculation history to file{Style.RESET_ALL}")
+                        print(f"  {Back.YELLOW}load - Load calculation history from file{Style.RESET_ALL}")
+                        print(f"  {Back.WHITE}{Fore.BLACK}exit - Exit the calculator{Style.RESET_ALL}")
                         continue
 
                     if command == 'exit':
@@ -447,7 +451,7 @@ class Calculator:
                         if not history:
                             print("No calculations in history")
                         else:
-                            print("\nCalculation History:")
+                            print(f"\nCalculation History:")
                             for i, entry in enumerate(history, 1):
                                 print(f"{i}. {entry}")
                         continue

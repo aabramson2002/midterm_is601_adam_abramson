@@ -295,3 +295,17 @@ def test_calculator_repl_operation_validation_error(mock_print, mock_input):
 def test_calculator_repl_operation_operation_error(mock_print, mock_input):
     Calculator.calculator_repl()
     mock_print.assert_any_call("Error: Division by zero is not allowed")
+
+#Handles keyboard interrupt exception on repl
+@patch('builtins.input', side_effect=KeyboardInterrupt)
+@patch('builtins.print')
+def test_calculator_repl_keyboard_interrupt(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("\nOperation cancelled")
+
+#Handles end of file error on repl
+@patch('builtins.input', side_effect=EOFError)
+@patch('builtins.print')
+def test_calculator_repl_eof_error(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("\nInput terminated. Exiting...")
