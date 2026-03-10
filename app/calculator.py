@@ -421,7 +421,7 @@ class Calculator:
                     if command == 'help':
                         # Display available commands
                         print("\nAvailable commands:")
-                        print("  add, subtract, multiply, divide, power, root, mod, intdivide, percent, abs - Perform calculations")
+                        print("  add, subtract, multiply, divide, power, root, modulus, int_divide, percent, abs_diff - Perform calculations")
                         print("  history - Show calculation history")
                         print("  clear - Clear calculation history")
                         print("  undo - Undo the last calculation")
@@ -492,7 +492,7 @@ class Calculator:
                             print(f"Error loading history: {e}")
                         continue
 
-                    if command in ['add', 'subtract', 'multiply', 'divide', 'power', 'root', 'mod', 'intdivide', 'percent', 'abs']:
+                    if command in ['add', 'subtract', 'multiply', 'divide', 'power', 'root', 'modulus', 'int_divide', 'percent', 'abs_diff']:
                         # Perform the specified arithmetic operation
                         try:
                             print("\nEnter numbers (or 'cancel' to abort):")

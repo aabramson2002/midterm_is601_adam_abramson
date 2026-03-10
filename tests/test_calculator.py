@@ -177,3 +177,121 @@ def test_calculator_repl_help(mock_print, mock_input):
 def test_calculator_repl_addition(mock_print, mock_input):
     Calculator.calculator_repl()
     mock_print.assert_any_call("\nResult: 5")
+
+"""
+#Tests history on repl with empty history
+@patch('builtins.input', side_effect=['history', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_history_empty(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("No calculations in history")\
+
+#Tests history on repl with non-empty history
+@patch('builtins.input', side_effect=['add', '1', '2', 'history', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_history_non_empty(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Calculation History:")
+    mock_print.assert_any_call("1. Addition(1, 2) = 3")
+"""
+
+#Tests clear command on repl
+@patch('builtins.input', side_effect=['add', '1', '2', 'clear', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_clear(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("History cleared")
+
+#Tests undo commmand on repl
+@patch('builtins.input', side_effect=['add', '1', '2', 'undo', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_undo_success(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Operation undone")
+
+#Tests fail case for undo command on repl
+@patch('builtins.input', side_effect=['undo', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_undo_fail(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Nothing to undo")
+
+#Tests redo commmand on repl
+@patch('builtins.input', side_effect=['add', '1', '2', 'undo', 'redo', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_redo_success(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Operation redone")
+
+#Tests fail case for redo command on repl
+@patch('builtins.input', side_effect=['redo', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_redo_fail(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Nothing to redo")
+
+#Tests save command on repl
+@patch('builtins.input', side_effect=['save', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_save_success(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("History saved successfully")
+
+#Tests fail case for save command on repl
+@patch('builtins.input', side_effect=['save', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator.Calculator.save_history', side_effect=Exception("Save failed"))
+def test_calculator_repl_save_fail(mock_save, mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Error saving history: Save failed")
+
+#Tests load command on repl
+@patch('builtins.input', side_effect=['load', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_load_success(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("History loaded successfully")
+
+#Tests fail case for load command on repl
+@patch('builtins.input', side_effect=['load', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator.Calculator.load_history', side_effect=Exception("Load failed"))
+def test_calculator_repl_load_fail(mock_load, mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Error loading history: Load failed")
+
+#Test case for commands that do not exist on repl
+@patch('builtins.input', side_effect=['pizza', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_unknown_command(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Unknown command: 'pizza'. Type 'help' for available commands.")
+
+#Tests cancel command on the first number when doing an operation on calculator
+@patch('builtins.input', side_effect=['add', 'cancel', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_operation_cancel_first(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Operation cancelled")
+
+#Tests cancel command on the second number when doing an operation on calculator
+@patch('builtins.input', side_effect=['add', '1', 'cancel', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_operation_cancel_second(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Operation cancelled")
+
+#Tests invalid number format when doing an operation on calculator
+@patch('builtins.input', side_effect=['add', '3', 'x', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_operation_validation_error(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Error: Invalid number format: x")
+
+
+#Tests for operation errors like division by zero on calculator
+@patch('builtins.input', side_effect=['divide', '1', '0', 'exit'])
+@patch('builtins.print')
+def test_calculator_repl_operation_operation_error(mock_print, mock_input):
+    Calculator.calculator_repl()
+    mock_print.assert_any_call("Error: Division by zero is not allowed")
